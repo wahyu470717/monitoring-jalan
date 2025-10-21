@@ -1,0 +1,407 @@
+# Dashboard Monitoring Infrastruktur Jalan
+
+Sistem informasi monitoring infrastruktur jalan berbasis web menggunakan FastAPI, PostgreSQL, dan Clean Architecture.
+
+##  Fitur
+
+-  Dashboard real-time dengan visualisasi data
+-  CRUD lengkap untuk data jalan
+-  Filter dan pencarian data
+-  Statistik kondisi jalan
+-  Grafik kondisi dan status perbaikan
+-  RESTful API
+-  Clean Architecture (Domain, Repository, Service, API)
+
+##  Teknologi
+
+- **Backend**: FastAPI 0.104.1
+- **Database**: PostgreSQL
+- **ORM**: SQLAlchemy 2.0.23
+- **Frontend**: HTML, Tailwind CSS, Chart.js
+- **Python**: 3.9+
+
+##  Struktur Folder
+
+```
+monitoring-jalan/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                 # Entry point aplikasi
+│   ├── config.py               # Konfigurasi
+│   ├── database.py             # Database connection
+│   │
+│   ├── domain/                 # Entity layer
+│   │   ├── __init__.py
+│   │   └── models.py           # Database models
+│   │
+│   ├── repository/             # Data layer
+│   │   ├── __init__.py
+│   │   └── jalan_repository.py # Data access operations
+│   │
+│   ├── service/                # Business logic layer
+│   │   ├── __init__.py
+│   │   └── jalan_service.py    # Business logic
+│   │
+│   ├── api/                    # Presentation layer
+│   │   ├── __init__.py
+│   │   ├── routes/
+│   │   │   ├── __init__.py
+│   │   │   ├── jalan.py        # API endpoints
+│   │   │   └── dashboard.py    # Dashboard routes
+│   │   └── schemas/
+│   │       ├── __init__.py
+│   │       └── jalan_schema.py # Pydantic schemas
+│   │
+│   └── templates/
+│       └── dashboard.html      # Frontend dashboard
+│
+├── scripts/
+│   └── seed_data.py           # Script data dummy
+│
+├── requirements.txt
+├── .env
+└── README.md
+```
+
+##  Cara Instalasi
+
+### 1. Persiapan Environment
+
+```bash
+# Clone atau buat folder project
+mkdir monitoring-jalan
+cd monitoring-jalan
+
+# Buat virtual environment (opsional tapi direkomendasikan)
+python -m venv venv
+
+# Aktifkan virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+```
+
+### 2. Install Dependencies
+
+```bash
+# Install semua dependencies
+pip install -r requirements.txt
+```
+
+### 3. Setup Database PostgreSQL
+
+```bash
+# Login ke PostgreSQL
+psql -U postgres
+
+# Buat database
+CREATE DATABASE monitoring_jalan;
+
+# Buat user (opsional)
+CREATE USER jalan_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE monitoring_jalan TO jalan_user;
+
+# Keluar dari psql
+\q
+```
+
+### 4. Konfigurasi Environment
+
+Buat file `.env` di root folder dan sesuaikan konfigurasi:
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/monitoring_jalan
+APP_NAME=Monitoring Infrastruktur Jalan
+DEBUG=True
+HOST=0.0.0.0
+PORT=8000
+```
+
+**Penting**: Ganti `password` dengan password PostgreSQL Anda!
+
+### 5. Buat Semua File
+
+Buat struktur folder sesuai dengan struktur di atas, kemudian copy semua kode yang sudah dibuat ke file masing-masing.
+
+**File __init__.py kosong** diperlukan di folder:
+- `app/__init__.py`
+- `app/domain/__init__.py`
+- `app/repository/__init__.py`
+- `app/service/__init__.py`
+- `app/api/__init__.py`
+- `app/api/routes/__init__.py`
+- `app/api/schemas/__init__.py`
+
+Buat file kosong dengan:
+```bash
+# Linux/Mac
+touch app/__init__.py
+touch app/domain/__init__.py
+touch app/repository/__init__.py
+touch app/service/__init__.py
+touch app/api/__init__.py
+touch app/api/routes/__init__.py
+touch app/api/schemas/__init__.py
+
+# Windows (PowerShell)
+New-Item -ItemType File -Path app/__init__.py
+# dst...
+```
+
+### 6. Buat Folder Templates
+
+```bash
+mkdir app/templates
+# Kemudian copy file dashboard.html ke folder ini
+```
+
+### 7. Seed Data Dummy
+
+```bash
+# Jalankan script untuk mengisi database dengan data dummy
+python -m scripts.seed_data
+```
+
+Output yang diharapkan:
+```
+ Memulai seeding database...
+✓ Database initialized
+✓ Data lama berhasil dihapus
+✓ Berhasil menambahkan 75 data jalan
+
+ Statistik Data:
+   Total Jalan: 75
+   - Baik: 18
+   - Sedang: 20
+   - Rusak Ringan: 19
+   - Rusak Berat: 18
+   Total Panjang: 85.43 km
+   Total Estimasi Biaya: Rp 10.25 Miliar
+
+```
+
+### 8. Jalankan Aplikasi
+
+```bash
+# Jalankan server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Atau dengan Python:
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+### 9. Akses Aplikasi
+
+Buka browser dan akses:
+
+- **Dashboard**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
+- **Alternative API Docs**: http://localhost:8000/redoc
+- **Health Check**: http://localhost:8000/health
+
+## 📡 API Endpoints
+
+### Jalan Endpoints
+
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| GET | `/api/jalan/` | Semua data jalan |
+| GET | `/api/jalan/stats` | Statistik dashboard |
+| GET | `/api/jalan/{id}` | Detail jalan by ID |
+| POST | `/api/jalan/` | Tambah jalan baru |
+| PUT | `/api/jalan/{id}` | Update jalan |
+| DELETE | `/api/jalan/{id}` | Hapus jalan |
+| GET | `/api/jalan/kondisi/{kondisi}` | Filter by kondisi |
+| GET | `/api/jalan/kecamatan/{kecamatan}` | Filter by kecamatan |
+
+### Contoh Request
+
+**GET All Jalan:**
+```bash
+curl http://localhost:8000/api/jalan/
+```
+
+**GET Statistics:**
+```bash
+curl http://localhost:8000/api/jalan/stats
+```
+
+**POST Create Jalan:**
+```bash
+curl -X POST "http://localhost:8000/api/jalan/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "kode_jalan": "JL-9999",
+    "nama_jalan": "Jl. Test API",
+    "kecamatan": "Ciputat",
+    "kelurahan": "Ciputat",
+    "panjang": 500.0,
+    "lebar": 8.0,
+    "kondisi": "BAIK",
+    "persentase_kerusakan": 5.0,
+    "jenis_permukaan": "Aspal",
+    "status_perbaikan": "BELUM",
+    "tanggal_inspeksi": "2025-01-15",
+    "estimasi_biaya": 50000000,
+    "latitude": -6.3,
+    "longitude": 106.75
+  }'
+```
+
+**PUT Update Jalan:**
+```bash
+curl -X PUT "http://localhost:8000/api/jalan/1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "kondisi": "SEDANG",
+    "persentase_kerusakan": 25.0,
+    "status_perbaikan": "PROSES"
+  }'
+```
+
+**DELETE Jalan:**
+```bash
+curl -X DELETE "http://localhost:8000/api/jalan/1"
+```
+
+
+### 1. Statistik Cards
+- Total jalan
+- Total panjang (km)
+- Jumlah jalan rusak
+- Estimasi biaya perbaikan
+
+### 2. Visualisasi Chart
+- **Doughnut Chart**: Distribusi kondisi jalan
+- **Bar Chart**: Status perbaikan
+
+### 3. Data Table
+- Filter by kondisi
+- Search real-time
+- Tampilan responsif
+
+
+### 1. Domain Layer (`app/domain/`)
+- Berisi entity/models database
+- Tidak bergantung pada layer lain
+- Pure business objects
+
+### 2. Repository Layer (`app/repository/`)
+- Data access operations
+- Komunikasi langsung dengan database
+- Abstraksi query database
+
+### 3. Service Layer (`app/service/`)
+- Business logic
+- Orchestrasi repository
+- Validasi business rules
+
+### 4. API/Presentation Layer (`app/api/`)
+- HTTP endpoints
+- Request/Response handling
+- Schemas validation
+
+
+### Database Connection Error
+
+```
+sqlalchemy.exc.OperationalError: could not connect to server
+```
+
+**Solusi:**
+1. Pastikan PostgreSQL sudah running
+2. Cek username, password, dan nama database di `.env`
+3. Cek port PostgreSQL (default: 5432)
+
+### Import Error
+
+```
+ModuleNotFoundError: No module named 'app'
+```
+
+**Solusi:**
+1. Pastikan menjalankan dari root folder project
+2. Pastikan semua folder memiliki `__init__.py`
+3. Jalankan dengan format: `python -m uvicorn app.main:app`
+
+### Template Not Found
+
+```
+jinja2.exceptions.TemplateNotFound: dashboard.html
+```
+
+**Solusi:**
+1. Pastikan folder `app/templates/` ada
+2. Pastikan file `dashboard.html` ada di dalam folder tersebut
+
+### Port Already in Use
+
+```
+ERROR: [Errno 48] Address already in use
+```
+
+**Solusi:**
+1. Hentikan aplikasi yang menggunakan port 8000
+2. Atau gunakan port lain: `--port 8001`
+
+##  Development
+
+### Menambah Model Baru
+
+1. Buat model di `app/domain/models.py`
+2. Buat repository di `app/repository/`
+3. Buat service di `app/service/`
+4. Buat routes di `app/api/routes/`
+5. Buat schemas di `app/api/schemas/`
+
+### Database Migration (Opsional)
+
+Untuk production, gunakan Alembic:
+
+```bash
+# Initialize alembic
+alembic init alembic
+
+# Create migration
+alembic revision --autogenerate -m "Initial migration"
+
+# Run migration
+alembic upgrade head
+```
+
+##  Data Model
+
+### Enum KondisiJalan
+- `BAIK`: 0-15% kerusakan
+- `SEDANG`: 15-40% kerusakan
+- `RUSAK_RINGAN`: 40-65% kerusakan
+- `RUSAK_BERAT`: 65-100% kerusakan
+
+### Enum StatusPerbaikan
+- `BELUM`: Belum diperbaiki
+- `PROSES`: Sedang dalam perbaikan
+- `SELESAI`: Perbaikan selesai
+
+##  Contributing
+
+Kontribusi sangat diterima! Silakan:
+1. Fork repository
+2. Buat branch baru (`git checkout -b feature/AmazingFeature`)
+3. Commit perubahan (`git commit -m 'Add some AmazingFeature'`)
+4. Push ke branch (`git push origin feature/AmazingFeature`)
+5. Buat Pull Request
+
+##  License
+
+Project ini dibuat untuk keperluan pembelajaran dan monitoring infrastruktur jalan.
+
+##  Author
+
+Dibuat dengan  menggunakan FastAPI dan PostgreSQL
+
+---
+
+**Selamat mencoba! Jika ada pertanyaan, silakan buat issue.**
