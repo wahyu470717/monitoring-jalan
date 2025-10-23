@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from app.domain.models import Jalan
 from app.api.schemas.jalan_schema import JalanCreate, JalanUpdate
@@ -48,30 +49,3 @@ class JalanRepository:
             Jalan.kecamatan == kecamatan,
             Jalan.is_active == True
         ).all()
-    
-    def get_dashboard_stats(self):
-        total_jalan = self.db.query(Jalan).filter(Jalan.is_active == True).count()
-        total_panjang = self.db.query(Jalan).filter(Jalan.is_active == True).with_entities(
-            func.sum(Jalan.panjang)
-        ).scalar() or 0
-        
-        kondisi_stats = self.db.query(
-            Jalan.kondisi,
-            func.count(Jalan.id)
-        ).filter(Jalan.is_active == True).group_by(Jalan.kondisi).all()
-        
-        total_anggaran = self.db.query(Jalan).filter(Jalan.is_active == True).with_entities(
-            func.sum(Jalan.anggaran)
-        ).scalar() or 0
-        
-        stats_dict = {kondisi: count for kondisi, count in kondisi_stats}
-        
-        return {
-            "total_jalan": total_jalan,
-            "total_panjang": total_panjang,
-            "kondisi_baik": stats_dict.get("Baik", 0),
-            "kondisi_sedang": stats_dict.get("Sedang", 0),
-            "kondisi_rusak": stats_dict.get("Rusak", 0),
-            "kondisi_rusak_berat": stats_dict.get("Rusak Berat", 0),
-            "total_anggaran": total_anggaran
-        }

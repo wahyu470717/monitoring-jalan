@@ -28,6 +28,6 @@ class JalanService:
     def get_jalan_by_kecamatan(self, kecamatan: str) -> List[JalanCreate]:
         return self.repository.get_by_kecamatan(kecamatan)
     
-    def get_dashboard_stats(self) -> DashboardStats:
-        stats = self.repository.get_dashboard_stats()
-        return DashboardStats(**stats)
+    # def get_dashboard_stats(self) -> DashboardStats:
+    #     stats = self.repository.get_dashboard_stats()
+    #     return DashboardStats(**stats)

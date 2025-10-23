@@ -1,31 +1,57 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.api.routes import jalan, dashboard
-import os
+from app.api.routes import jalan, auth, dashboard
+from app.config import settings
 
-# Create tables - PASTIKAN INI DIJALANKAN SEBELUM SEEDING
+# Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Sistem Monitoring Infrastruktur Jalan",
     description="Dashboard untuk memonitoring kondisi infrastruktur jalan",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc"
+)
+
+# CORS Configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(jalan.router)
 app.include_router(dashboard.router)
 
 @app.get("/")
 def root():
-    return {"message": "Sistem Monitoring Infrastruktur Jalan API"}
+    return {
+        "status": "success",
+        "code": 200,
+        "message": "Sistem Monitoring Infrastruktur Jalan API",
+        "data": {
+            "version": "1.0.0",
+            "docs": "/api/docs"
+        }
+    }
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "success",
+        "code": 200,
+        "message": "Service is healthy",
+        "data": {
+            "status": "healthy"
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=settings.DEBUG)
